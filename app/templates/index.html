@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Plan a journey{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Plan your journey</h1>
+  <p class="lead">Pick where you are and where you are going. TransitScrum shows which routes run that way, how long you will wait, and the ride time.</p>
+  <form class="search" method="get" action="{{ url_for('index') }}">
+    <label for="origin">From</label>
+    <select id="origin" name="origin" required>
+      <option value="">Choose a stop</option>
+      {% for sid, name in stops.items() %}
+      <option value="{{ sid }}" {% if sid == origin %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+    <label for="destination">To</label>
+    <select id="destination" name="destination" required>
+      <option value="">Choose a stop</option>
+      {% for sid, name in stops.items() %}
+      <option value="{{ sid }}" {% if sid == destination %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Find routes</button>
+  </form>
+</section>
+
+{% if error %}
+<p class="notice error" role="alert">{{ error }}</p>
+{% endif %}
+
+{% if results is not none %}
+<section aria-labelledby="results-h">
+  <h2 id="results-h">Journey options</h2>
+  {% if results %}
+  <div class="cards">
+    {% for r in results %}
+    <article class="card route-{{ r.colour }}">
+      <h3><span class="chip">{{ r.route_id }}</span> {{ r.route_name }}</h3>
+      <p class="big">{{ r.total_min }} min <small>door to door</small></p>
+      <p>Wait {{ r.wait_min }} min &middot; ride {{ r.ride_min }} min</p>
+      <p class="muted">{{ r.stop_names | join(' → ') }}</p>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="notice">No single route connects those stops in that direction. Try the other way round, or check <a href="{{ url_for('routes') }}">all routes</a>.</p>
+  {% endif %}
+</section>
+{% endif %}
+
+<section class="stats" aria-label="Network at a glance">
+  <div><strong>{{ route_count }}</strong><span>routes</span></div>
+  <div><strong>{{ stop_count }}</strong><span>stops</span></div>
+  <div><strong>5 s</strong><span>live refresh</span></div>
+</section>
+
+<section aria-labelledby="boards-h">
+  <h2 id="boards-h">Arrival boards</h2>
+  <ul class="pills">
+    {% for sid, name in stops.items() %}
+    <li><a href="{{ url_for('stop_board', stop_id=sid) }}">{{ name }}</a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

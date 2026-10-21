@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Home{% endblock %} · TransitScrum</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="brand" href="{{ url_for('index') }}">Transit<span>Scrum</span></a>
+      <nav aria-label="Main">
+        <a href="{{ url_for('index') }}" {% if request.path == '/' %}aria-current="page"{% endif %}>Plan</a>
+        <a href="{{ url_for('routes') }}" {% if request.path == '/routes' %}aria-current="page"{% endif %}>Routes</a>
+        <a href="{{ url_for('track') }}" {% if request.path == '/track' %}aria-current="page"{% endif %}>Live</a>
+        <a href="{{ url_for('scrum') }}" {% if request.path == '/scrum' %}aria-current="page"{% endif %}>Scrum</a>
+        <a href="{{ url_for('about') }}" {% if request.path == '/about' %}aria-current="page"{% endif %}>About</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>DevSecOps Lab micro-project &middot; Smart Public Transportation &middot; supports SDG 9 (Industry, Innovation and Infrastructure) &middot; demo data is simulated.</p>
+    </div>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

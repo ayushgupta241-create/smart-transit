@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+<h1>About TransitScrum</h1>
+<p class="lead">A small public transport information service, built with Scrum and delivered through a DevSecOps pipeline.</p>
+
+<section aria-labelledby="sdg-h">
+  <h2 id="sdg-h">How it supports SDG 9</h2>
+  <ul>
+    <li><strong>Innovation:</strong> live arrivals and vehicle positions give commuters data they can act on.</li>
+    <li><strong>Infrastructure:</strong> the hosting is described as code (Terraform), so it can be rebuilt the same way every time.</li>
+    <li><strong>Reliability:</strong> a health endpoint, automated tests and a repeatable container image catch problems before users do.</li>
+    <li><strong>Security:</strong> code and images are scanned on every build, and the app sends strict security headers.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="flow-h">
+  <h2 id="flow-h">DevSecOps workflow</h2>
+  <ol>
+    <li>Commit to GitHub.</li>
+    <li>Jenkins runs the unit tests.</li>
+    <li>SonarQube analyses the code; Trivy scans dependencies and Terraform.</li>
+    <li>Jenkins builds the Docker image; Trivy scans the image.</li>
+    <li>The image is deployed to the AWS server that Terraform created.</li>
+  </ol>
+</section>
+
+<section aria-labelledby="stack-h">
+  <h2 id="stack-h">Tech stack</h2>
+  <table class="table">
+    <tbody>
+      <tr><th scope="row">Application</th><td>Python, Flask, Gunicorn</td></tr>
+      <tr><th scope="row">Source control</th><td>Git and GitHub</td></tr>
+      <tr><th scope="row">Container</th><td>Docker</td></tr>
+      <tr><th scope="row">CI/CD</th><td>Jenkins</td></tr>
+      <tr><th scope="row">Infrastructure</th><td>Terraform on AWS (VPC, EC2, security group)</td></tr>
+      <tr><th scope="row">Security</th><td>SonarQube, Trivy</td></tr>
+      <tr><th scope="row">Planning</th><td>Scrum, JIRA</td></tr>
+    </tbody>
+  </table>
+</section>
+{% endblock %}

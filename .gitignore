@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.coverage
+coverage.xml
+test-results.xml
+
+# Scanner output
+.scannerwork/
+trivy-*.txt
+trivy-*.json
+
+# Terraform - never commit state or real variable values (they can contain secrets)
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfvars
+!terraform/terraform.tfvars.example
+terraform/crash.log
+
+# Secrets and editor files
+.env
+*.pem
+*.key
+.idea/
+.vscode/

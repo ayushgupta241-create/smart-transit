@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Live tracking{% endblock %}
+{% block content %}
+<h1>Live vehicle tracking</h1>
+<p class="muted" id="live-status" role="status">Connecting to live data…</p>
+
+{% for r in routes %}
+<section class="route-{{ r.colour }} lane" data-route="{{ r.id }}" aria-label="{{ r.name }}">
+  <h2><span class="chip">{{ r.id }}</span> {{ r.name }}</h2>
+  <div class="strip-scroll">
+    <div class="strip">
+      <div class="line"></div>
+      <div class="vehicles"></div>
+      <div class="stops">
+        {% for s in r.stops %}<div class="stop">{{ s.name }}</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+  <ul class="vehicle-list"></ul>
+</section>
+{% endfor %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='track.js') }}"></script>{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Scrum board{% endblock %}
+{% block content %}
+<h1>Scrum board</h1>
+<p class="muted">Individual project: one student covers the Product Owner, Scrum Master and Developer roles. The same backlog is tracked in JIRA.</p>
+
+<section class="progress-box" aria-label="Progress">
+  <label for="pts">Story points done: <strong>{{ done_points }}</strong> of {{ total_points }}</label>
+  <progress id="pts" value="{{ done_points }}" max="{{ total_points }}"></progress>
+</section>
+
+<section aria-labelledby="sprints-h">
+  <h2 id="sprints-h">Sprints</h2>
+  <div class="cards">
+    {% for s in sprints %}
+    <article class="card">
+      <h3>Sprint {{ s.number }}</h3>
+      <p><strong>Goal:</strong> {{ s.goal }}</p>
+      <ul class="plain">
+        {% for item in backlog | selectattr('sprint', 'equalto', s.number) %}
+        <li><span class="badge badge-{{ item.status | lower | replace(' ', '-') }}">{{ item.status }}</span> {{ item.id }}</li>
+        {% endfor %}
+      </ul>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section aria-labelledby="backlog-h">
+  <h2 id="backlog-h">Product backlog</h2>
+  <table class="table">
+    <thead><tr><th scope="col">ID</th><th scope="col">User story</th><th scope="col">Points</th><th scope="col">Sprint</th><th scope="col">Status</th></tr></thead>
+    <tbody>
+      {% for item in backlog %}
+      <tr>
+        <td>{{ item.id }}</td>
+        <td>{{ item.story }}</td>
+        <td>{{ item.points }}</td>
+        <td>{{ item.sprint }}</td>
+        <td><span class="badge badge-{{ item.status | lower | replace(' ', '-') }}">{{ item.status }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section aria-labelledby="dod-h">
+  <h2 id="dod-h">Definition of Done</h2>
+  <ul>
+    {% for d in definition_of_done %}<li>{{ d }}</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Routes{% endblock %}
+{% block content %}
+<h1>All routes</h1>
+<div class="cards">
+  {% for r in routes %}
+  <article class="card route-{{ r.colour }}">
+    <h2><span class="chip">{{ r.id }}</span> {{ r.name }}</h2>
+    <p class="muted">Every {{ r.headway_min }} min &middot; {{ r.trip_min }} min end to end</p>
+    <ol class="stop-list">
+      {% for s in r.stops %}
+      <li><a href="{{ url_for('stop_board', stop_id=s.id) }}">{{ s.name }}</a></li>
+      {% endfor %}
+    </ol>
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

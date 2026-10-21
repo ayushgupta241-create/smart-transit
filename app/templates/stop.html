@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ stop_name }}{% endblock %}
+{% block head %}<meta http-equiv="refresh" content="30">{% endblock %}
+{% block content %}
+<h1>{{ stop_name }}</h1>
+<p class="muted">Next arrivals. This page refreshes every 30 seconds.</p>
+<table class="table">
+  <thead><tr><th scope="col">Route</th><th scope="col">Name</th><th scope="col">Arrives in</th></tr></thead>
+  <tbody>
+    {% for a in arrivals %}
+    <tr class="route-{{ a.colour }}">
+      <td><span class="chip">{{ a.route_id }}</span></td>
+      <td>{{ a.route_name }}</td>
+      <td>{% if a.eta_min < 1 %}Due{% else %}{{ a.eta_min }} min{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<h2>Other stops</h2>
+<ul class="pills">
+  {% for sid, name in stops.items() if sid != stop_id %}
+  <li><a href="{{ url_for('stop_board', stop_id=sid) }}">{{ name }}</a></li>
+  {% endfor %}
+</ul>
+{% endblock %}
