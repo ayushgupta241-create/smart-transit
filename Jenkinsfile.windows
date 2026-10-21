@@ -1,0 +1,63 @@
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install & Test') {
+            steps {
+                bat '''
+                docker run --rm -v "%WORKSPACE%:/workspace" -w /workspace python:3.12-slim sh -c "python -m pip install --disable-pip-version-check -r requirements.txt pytest pytest-cov && python -m pytest -v --cov=app --cov-report=xml --junitxml=test-results.xml"
+                '''
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'test-results.xml'
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                bat 'docker build -t smart-transit-jenkins:%BUILD_NUMBER% .'
+            }
+        }
+
+        stage('Deploy Locally') {
+            steps {
+                script {
+                    bat(
+                        script: 'docker rm -f smart-transit-jenkins',
+                        returnStatus: true
+                    )
+                    bat 'docker run -d --name smart-transit-jenkins --restart unless-stopped -p 8082:8000 smart-transit-jenkins:%BUILD_NUMBER%'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts(
+                artifacts: 'coverage.xml,test-results.xml',
+                allowEmptyArchive: true
+            )
+        }
+        success {
+            echo 'Tests passed, Docker image built and deployed locally.'
+        }
+        failure {
+            echo 'Pipeline failed. Check Console Output.'
+        }
+    }
+}
