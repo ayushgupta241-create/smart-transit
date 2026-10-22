@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_EXE = 'C:\\Users\\Ayush Gupta\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe'
-    }
-
     options {
         timestamps()
         disableConcurrentBuilds()
@@ -21,20 +17,20 @@ pipeline {
         stage('Install & Test') {
             steps {
                 bat '''
-                "%DOCKER_EXE%" run --rm -v "%WORKSPACE%:/workspace" -w /workspace python:3.12-slim sh -c "python -m pip install --disable-pip-version-check -r requirements.txt pytest pytest-cov && python -m pytest -v --cov=app --cov-report=xml --junitxml=test-results.xml"
+                docker run --rm -v "%WORKSPACE%:/workspace" -w /workspace python:3.12-slim sh -c "python -m pip install --disable-pip-version-check -r requirements-dev.txt && python -m pytest -v --cov=app --cov-report=xml --junitxml=test-results.xml"
                 '''
             }
             post {
                 always {
                     junit allowEmptyResults: true,
-                        testResults: 'test-results.xml'
+                          testResults: 'test-results.xml'
                 }
             }
         }
 
         stage('Docker Build') {
             steps {
-                bat '"%DOCKER_EXE%" build -t smart-transit-jenkins:%BUILD_NUMBER% .'
+                bat 'docker build -t smart-transit-jenkins:%BUILD_NUMBER% .'
             }
         }
 
@@ -42,11 +38,11 @@ pipeline {
             steps {
                 script {
                     bat(
-                        script: '"%DOCKER_EXE%" rm -f smart-transit-jenkins',
+                        script: 'docker rm -f smart-transit-jenkins',
                         returnStatus: true
                     )
 
-                    bat '"%DOCKER_EXE%" run -d --name smart-transit-jenkins --restart unless-stopped -p 8082:8000 smart-transit-jenkins:%BUILD_NUMBER%'
+                    bat 'docker run -d --name smart-transit-jenkins --restart unless-stopped -p 8082:8000 smart-transit-jenkins:%BUILD_NUMBER%'
                 }
             }
         }
@@ -55,15 +51,65 @@ pipeline {
     post {
         always {
             archiveArtifacts(
-                artifacts: 'coverage.xml,test-results.xml',
+                artifacts: 'coverage.xml, test-results.xml',
                 allowEmptyArchive: true
             )
         }
+
         success {
-            echo 'Tests passed and local Docker deployment completed.'
+            echo 'Tests passed, Docker image built and deployed locally.'
         }
+
         failure {
             echo 'Pipeline failed. Check Console Output.'
+        }
+    }
+}
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Test') {
+            steps {
+                bat '''
+                docker run --rm -v "%WORKSPACE%:/workspace" -w /workspace python:3.12-slim sh -c "python -m pip install --disable-pip-version-check -r requirements.txt pytest pytest-cov && python -m pytest -v --cov=app --cov-report=xml --junitxml=test-results.xml"
+                '''
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'test-results.xml'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t smart-transit-jenkins:%BUILD_NUMBER% .'
+            }
+        }
+        stage('Trivy Security Scan') {
+            steps {
+                bat '''
+                "%DOCKER_EXE%" save smart-transit-jenkins:%BUILD_NUMBER% -o trivy-image.tar
+                "%DOCKER_EXE%" run --rm -v "%WORKSPACE%:/workspace" -w /workspace aquasec/trivy:latest image --input trivy-image.tar --severity HIGH,CRITICAL --exit-code 0 --format table > trivy-report.txt
+                if errorlevel 1 exit /b 1
+                type trivy-report.txt
+                del trivy-image.tar
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                bat 'docker rm -f smart-transit-jenkins'
+                bat 'docker run -d --name smart-transit-jenkins -p 8082:8000 smart-transit-jenkins:%BUILD_NUMBER%'
+            }
         }
     }
 }
