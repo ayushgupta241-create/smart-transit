@@ -124,3 +124,5 @@ Create a Scrum project, add the user stories from `app/backlog.py` (US-01 to US-
 - [ ] Demo video with no passwords, tokens or access keys visible
 
 Jenkins SCM polling verification.
+
+Automatic Jenkins polling test.
