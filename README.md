@@ -122,3 +122,5 @@ Create a Scrum project, add the user stories from `app/backlog.py` (US-01 to US-
 - [ ] Live site at the Terraform `website_url`
 - [ ] JIRA board and sprint report
 - [ ] Demo video with no passwords, tokens or access keys visible
+
+Jenkins SCM polling verification.
